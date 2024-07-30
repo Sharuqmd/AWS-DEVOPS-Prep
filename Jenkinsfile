@@ -4,7 +4,7 @@ pipeline {
         maven 'm3' 
     }
     environment {
-        SCANNER_HOME = tool name: 'sonar-scanner', type: 'SonarQubeScanner'
+        SCANNER_HOME = tool 'sonar-scanner'
         SONAR_URL = 'http://65.2.37.199:9000/'
         SONAR_LOGIN = 'squ_ed23f27de91c4c4ed2af4ef532f6819f866793ed'
         SONAR_PROJECT_NAME = 'medicare'
