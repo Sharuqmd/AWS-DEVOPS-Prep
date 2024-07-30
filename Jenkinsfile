@@ -1,4 +1,3 @@
-#squ_4851e413cfe0c323c4be9cf84c94ff360c1e9132
 pipeline {
     agent any
     tools{
