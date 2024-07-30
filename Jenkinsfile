@@ -20,7 +20,7 @@ pipeline {
         }
         stage('sonar-analysis') {
             steps {
-                sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.url=http://3.7.71.223:9000/ -Dsonar.login=squ_4851e413cfe0c323c4be9cf84c94ff360c1e9132
+                sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.url=http://3.7.71.223:9000/ -Dsonar.login=squ_3139db62ddf80a628093a712d090ad14059ad86d
                         -Dsonar.projectName=medicare \
                         -Dsonar.java.binaries=. \
                         -Dsonar.projectKey=medicare '''
