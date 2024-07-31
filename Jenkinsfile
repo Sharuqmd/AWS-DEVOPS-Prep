@@ -32,11 +32,6 @@ pipeline {
                     -Dsonar.login=${SONAR_LOGIN}'''
             }
         }
-        stage('oswap-scan') {
-            steps {
-                sh 'mvn clean install'
-            }
-        } 
         stage('Build') {
             steps {
                 sh 'mvn clean install'
@@ -45,7 +40,7 @@ pipeline {
         stage('Build and push Docker image') {
             steps {
                script {
-                  withDockerRegistry(url: 'https://hub.docker.com/repository/docker/sharuq/medicare') {
+                  withDockerRegistry(credentialsId: '9e137af8-0187-4251-af7d-9445e3113fd7', url: 'https://hub.docker.com/repository/docker/sharuq/medicare')  {
                       sh 'docker build -t medicareapp .'
                       sh 'docker tag medicareapp sharuq/medicare:latest'
                       sh 'docker push sharuq/medicare:latest'
