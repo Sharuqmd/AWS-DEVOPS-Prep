@@ -5,8 +5,8 @@ pipeline {
     }
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
-        SONAR_URL = 'http://65.2.37.199:9000/'
-        SONAR_LOGIN = 'squ_ed23f27de91c4c4ed2af4ef532f6819f866793ed'
+        SONAR_URL = 'http://13.233.117.60:9000'
+        SONAR_LOGIN = 'squ_4aa21968c9c5793c9448079146ee5f14e0d7e19d'
         SONAR_PROJECT_NAME = 'medicare'
         SONAR_PROJECT_KEY = 'medicare'
     }
