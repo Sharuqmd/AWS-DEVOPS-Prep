@@ -9,6 +9,7 @@ pipeline {
         SONAR_LOGIN = 'squ_4aa21968c9c5793c9448079146ee5f14e0d7e19d'
         SONAR_PROJECT_NAME = 'medicare'
         SONAR_PROJECT_KEY = 'medicare'
+        DOCKER_CREDENTIALS_ID = 'docker'
     }
     stages {
         stage('checkout') {
@@ -40,7 +41,7 @@ pipeline {
         stage('Build and push Docker image') {
             steps {
                script {
-                  withDockerRegistry(credentialsId: '9e137af8-0187-4251-af7d-9445e3113fd7', url: 'https://hub.docker.com/repository/docker/sharuq/medicare')  {
+                  docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID)   {
                       sh 'docker build -t medicareapp .'
                       sh 'docker tag medicareapp sharuq/medicare:latest'
                       sh 'docker push sharuq/medicare:latest'
