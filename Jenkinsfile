@@ -47,7 +47,7 @@ pipeline {
                script {
                   withDockerRegistry(url: 'https://hub.docker.com/repository/docker/sharuq/medicare') {
                       sh 'docker build -t medicareapp .'
-                      sh 'docker tag sharuq/medicare:latest'
+                      sh 'docker tag medicareapp sharuq/medicare:latest'
                       sh 'docker push sharuq/medicare:latest'
 }
                }
