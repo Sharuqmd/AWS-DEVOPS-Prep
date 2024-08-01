@@ -5,8 +5,8 @@ pipeline {
     }
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
-        SONAR_URL = 'http://13.233.117.60:9000'
-        SONAR_LOGIN = 'squ_4aa21968c9c5793c9448079146ee5f14e0d7e19d'
+        SONAR_URL = 'http://35.154.166.14:9000'
+        SONAR_LOGIN = 'squ_1a17645e256d0cf2cf3c0ec735cb4de0066be870'
         SONAR_PROJECT_NAME = 'medicare'
         SONAR_PROJECT_KEY = 'medicare'
         DOCKER_CREDENTIALS_ID = 'docker'
@@ -48,6 +48,11 @@ pipeline {
 }
                }
             }
-        }         
+        }
+        stage('Running application') {
+            steps {
+                sh 'docker run -d -p 9092:8082 --name=app sharuq/medicare:latest '
+            }
+        }          
     }
 }
