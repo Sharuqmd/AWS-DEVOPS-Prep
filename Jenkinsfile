@@ -49,10 +49,25 @@ pipeline {
                }
             }
         }
-        stage('Running application') {
+        stage('Terraform Apply') {
             steps {
-                sh 'docker run -d -p 9092:8082 --name=app sharuq/medicare:latest '
+                script {
+                    sh '''
+                    terraform init
+                    terraform apply -auto-approve
+                    '''
+                }
             }
-        }          
+        }
+        stage('Configure kubectl') {
+            steps {
+                script {
+                    // Configure kubectl to use the EKS cluster
+                    sh '''
+                    aws eks update-kubeconfig --name eks-my-cluster --region ap-south-1
+                    '''
+                }
+            }
+        }
     }
 }
