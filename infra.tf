@@ -80,22 +80,7 @@ module "eks" {
       desired_size = 2
     }
   }
-  access_entries = {
-    example_access = {
-      kubernetes_groups = ["developers"]  
-      principal_arn     = "arn:aws:iam::891377344495:user/Terraformuser"  
-
-      policy_associations = {
-        example_policy = {
-          policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"  
-          access_scope = {
-            namespaces = ["default"]
-            type       = "namespace"
-          }
-        }
-      }
-    }
-  }
+  
 }
 
  
