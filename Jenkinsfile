@@ -10,6 +10,7 @@ pipeline {
         SONAR_PROJECT_NAME = 'medicare'
         SONAR_PROJECT_KEY = 'medicare'
         DOCKER_CREDENTIALS_ID = 'docker'
+        AWS_CREDENTIALS_ID = 'aws'
     }
     stages {
         stage('checkout') {
@@ -45,18 +46,20 @@ pipeline {
                       sh 'docker build -t medicareapp .'
                       sh 'docker tag medicareapp sharuq/medicare:latest'
                       sh 'docker push sharuq/medicare:latest'
-}
+                  }
                }
             }
         }
         stage('Terraform Apply') {
             steps {
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
                 script {
                     sh '''
                     terraform init
                     terraform apply -auto-approve
                     '''
                 }
+              }
             }
         }
         stage('Configure kubectl') {
