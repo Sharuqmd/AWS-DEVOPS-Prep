@@ -80,5 +80,16 @@ pipeline {
             
             }
         }
+        stage('Selenium test') {
+            steps {
+              sh " python -m venv my-venv "
+              sh " my-venv/bin/pip install selenium "
+              sh " source my-env/bin/activate"
+              sh " docker run -d -p 4444:4444 selenium/standalone-chrome"
+              sh " python3 test.py"
+            }
+            
+        }
     }
+  }
 }
