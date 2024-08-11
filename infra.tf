@@ -52,7 +52,7 @@ resource "aws_security_group_rule" "all_worker_mgmt_egress" {
 module "eks" {
   source          = "terraform-aws-modules/eks/aws"
   version         = "20.8.4"
-  cluster_name    = "eks-my-cluster"
+  cluster_name    = "eks-my-cluster-${terraform.workspace}" 
   cluster_version = "1.30"
   subnet_ids      = module.vpc.private_subnets
 
