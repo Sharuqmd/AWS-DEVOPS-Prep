@@ -55,6 +55,7 @@ pipeline {
               withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
                 script {
                     sh '''
+                    terraform workspace select test || terraform workspace new test
                     terraform init
                     terraform destroy -auto-approve
                     '''
