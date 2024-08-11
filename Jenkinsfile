@@ -50,56 +50,7 @@ pipeline {
                }
             }
         }
-        stage('Terraform Apply') {
-            steps {
-              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
-                script {
-                    sh '''
-                    terraform workspace select test || terraform workspace new test
-                    terraform init
-                    terraform destroy -auto-approve
-                    '''
-                }
-              }
-            }
-        }
-        stage('Configure kubectl') {
-            steps {
-              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
-                script {
-                    sh '''
-                    aws eks update-kubeconfig --name eks-my-cluster --region ap-south-1
-                    '''
-                    sh '''
-                    kubectl apply -f k8.yaml
-                    '''
-                }
-              }
-            }
-        }
-        stage('Selenium test') {
-            steps {
-              sh "python -m venv my-venv"
-              sh "my-venv/bin/pip install selenium"
-              sh "source my-env/bin/activate"
-              sh "docker run -d -p 4444:4444 selenium/standalone-chrome"
-              sh "python3 test.py"
-            }
-        }
-    }
-}
-
-
-
-
-
-pipeline {
-    agent any
-    environment {
-        AWS_CREDENTIALS_ID = 'aws'
-    }
-    stages {
-        stage('Terraform Apply') {
+        stage('Terraform Apply Test') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
                     script {
@@ -112,21 +63,21 @@ pipeline {
                 }
             }
         }
-        stage('Configure kubectl') {
+       
+        stage('Deploy Test Application') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
                     script {
                         sh '''
-                        aws eks update-kubeconfig --name eks-my-cluster --region ap-south-1
-                        '''
-                        sh '''
-                        kubectl apply -f k8.yaml
+                        aws eks update-kubeconfig --name eks-my-cluster-test --region ap-south-1
+                        kubectl apply -f k8-test.yaml
                         '''
                     }
                 }
             }
         }
-        stage('Fetch Service Endpoint') {
+        
+        stage('Fetch Test Service Endpoint') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
                     script {
@@ -153,30 +104,72 @@ pipeline {
                 }
             }
         }
-        stage('Setup Python Environment') {
+        
+        stage('Run Selenium Test on Test Environment') {
             steps {
-                script {
-                    // Create and activate a virtual environment using Bash
-                    sh '''
-                    python3 -m venv venv
-                    . venv/bin/activate
-                    pip install selenium
-                    '''
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
+                    script {
+                        sh '''
+                        python3 -m venv venv
+                        . venv/bin/activate
+                        pip install selenium
+                        python3 run.py ${ENDPOINT_URL}
+                        '''
+                    }
                 }
             }
         }
-        stage('Run Selenium Test') {
+        
+        stage('Terraform Apply Prod') {
             steps {
-                script {
-                    // Ensure the ENDPOINT_URL environment variable is set
-                    if (env.ENDPOINT_URL) {
-                        // Run the Selenium script with the endpoint URL using Bash
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
+                    script {
                         sh '''
-                        . venv/bin/activate
-                        python3 run.py ${ENDPOINT_URL}
+                        terraform workspace select prod || terraform workspace new prod
+                        terraform init
+                        terraform apply -auto-approve
                         '''
-                    } else {
-                        error "Endpoint URL is not set. Cannot run Selenium test."
+                    }
+                }
+            }
+        }
+        
+        stage('Deploy Prod Application') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
+                    script {
+                        sh '''
+                        aws eks update-kubeconfig --name eks-my-cluster-prod --region ap-south-1
+                        kubectl apply -f k8-prod.yaml
+                        '''
+                    }
+                }
+            }
+        }
+        
+        stage('Fetch Prod Service Endpoint') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
+                    script {
+                        // Print the current Kubernetes context
+                        sh 'kubectl config current-context'
+                        
+                        // Print the service details for debugging
+                        sh 'kubectl get svc'
+                        
+                        // Fetch the service external DNS name
+                        def externalIp = sh(script: '''
+                            kubectl get svc my-app-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+                            ''', returnStdout: true).trim()
+                        
+                        // Ensure the DNS name is properly formatted
+                        if (externalIp) {
+                            echo "Service External DNS: ${externalIp}"
+                            // Set the endpoint URL environment variable for the Selenium script
+                            env.ENDPOINT_URL = "http://${externalIp}:8082"
+                        } else {
+                            error "Failed to fetch the service external DNS name."
+                        }
                     }
                 }
             }
