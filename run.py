@@ -5,7 +5,7 @@ import os
 import time
 
 # URL of the Selenium Grid or remote WebDriver server
-selenium_server_url = "http://54.234.160.172:4444/wd/hub"
+selenium_server_url = "http://13.201.40.98:4444/wd/hub"
 
 # Configure Chrome options
 options = Options()
